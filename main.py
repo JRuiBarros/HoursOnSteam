@@ -1,7 +1,7 @@
 import requests
 import sys
 import click
-
+from configparser import ConfigParser
 
 @click.command()
 @click.option('-k', '--key', "key", help="Steam API key required to use the service. This option can not be used in the case there is already one key saved.")
@@ -12,6 +12,22 @@ def leApp(key, steam_id, save):
     # key = sys.argv[1]
     # steam_id = "76561197990642328"
     # steam_id = sys.argv[2]
+    config = ConfigParser()
+    config.read("config.ini")
+    
+    if save:
+        if not key:
+            print("Key argument is needed to save the key! Exiting!")
+            sys.exit()
+        config.set("main", "key", key)
+        with open("config.ini", "w") as f:
+            config.write(f)
+
+    if not key:
+        key = config.get("main", "key")
+        if not key:
+            print("Steam API key not found in argument or config.ini file. Exiting.")
+            sys.exit()
 
     username_payload = {"key": key, "steamids": steam_id}
     resp = requests.get(
